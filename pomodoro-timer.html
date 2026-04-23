@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄时钟</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .timer-display {
+            text-align: center;
+            margin: 40px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .timer {
+            font-size: 72px;
+            font-weight: 300;
+            color: white;
+            letter-spacing: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer.running {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            justify-content: center;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: linear-gradient(135deg, #0d7a6e 0%, #2dd46a 100%);
+        }
+
+        .btn-pause {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-pause:hover {
+            background: linear-gradient(135deg, #e07beb 0%, #e53e54 100%);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: linear-gradient(135deg, #ffd7b8 0%, #fc9f84 100%);
+        }
+
+        .presets-section {
+            margin-top: 30px;
+        }
+
+        .presets-title {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .presets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .preset-btn {
+            padding: 15px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .preset-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .custom-time {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: center;
+        }
+
+        .custom-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .custom-input:focus {
+            border-color: #667eea;
+        }
+
+        .btn-add {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .status.running {
+            color: #11998e;
+        }
+
+        .status.paused {
+            color: #f5576c;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 1;
+            display: none;
+        }
+
+        .preset-wrapper {
+            position: relative;
+        }
+
+        .preset-wrapper:hover .delete-btn {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍅 番茄时钟</h1>
+        
+        <div class="timer-display">
+            <div class="timer" id="timer">25:00</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-start" id="startBtn">开始</button>
+            <button class="btn btn-pause" id="pauseBtn">暂停</button>
+            <button class="btn btn-reset" id="resetBtn">重置</button>
+        </div>
+
+        <div class="status" id="status">准备开始专注时间</div>
+
+        <div class="presets-section">
+            <div class="presets-title">预设时间（分钟）</div>
+            <div class="presets-grid" id="presetsGrid">
+                <div class="preset-wrapper">
+                    <button class="preset-btn active" data-time="25">25分钟</button>
+                </div>
+                <div class="preset-wrapper">
+                    <button class="preset-btn" data-time="15">15分钟</button>
+                </div>
+                <div class="preset-wrapper">
+                    <button class="preset-btn" data-time="30">30分钟</button>
+                </div>
+                <div class="preset-wrapper">
+                    <button class="preset-btn" data-time="45">45分钟</button>
+                </div>
+                <div class="preset-wrapper">
+                    <button class="preset-btn" data-time="60">60分钟</button>
+                </div>
+            </div>
+
+            <div class="custom-time">
+                <input type="number" class="custom-input" id="customInput" placeholder="输入自定义分钟数" min="1" max="180">
+                <button class="btn-add" id="addPresetBtn">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let totalSeconds = 25 * 60;
+        let remainingSeconds = totalSeconds;
+        let timerInterval = null;
+        let isRunning = false;
+
+        const timerDisplay = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusDisplay = document.getElementById('status');
+        const presetsGrid = document.getElementById('presetsGrid');
+        const customInput = document.getElementById('customInput');
+        const addPresetBtn = document.getElementById('addPresetBtn');
+
+        function updateDisplay() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (!isRunning && remainingSeconds > 0) {
+                isRunning = true;
+                timerDisplay.classList.add('running');
+                statusDisplay.textContent = '专注中...';
+                statusDisplay.className = 'status running';
+                
+                timerInterval = setInterval(() => {
+                    remainingSeconds--;
+                    updateDisplay();
+                    
+                    if (remainingSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        isRunning = false;
+                        timerDisplay.classList.remove('running');
+                        statusDisplay.textContent = '时间到！休息一下吧 ☕';
+                        statusDisplay.className = 'status';
+                        
+                        // 播放提示音（如果浏览器支持）
+                        try {
+                            const audio = new AudioContext();
+                            const oscillator = audio.createOscillator();
+                            const gainNode = audio.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audio.destination);
+                            
+                            oscillator.frequency.value = 800;
+                            gainNode.gain.value = 0.3;
+                            
+                            oscillator.start();
+                            setTimeout(() => oscillator.stop(), 500);
+                        } catch(e) {
+                            console.log('音频播放不支持');
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                timerDisplay.classList.remove('running');
+                statusDisplay.textContent = '已暂停';
+                statusDisplay.className = 'status paused';
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timerDisplay.classList.remove('running');
+            remainingSeconds = totalSeconds;
+            updateDisplay();
+            statusDisplay.textContent = '准备开始专注时间';
+            statusDisplay.className = 'status';
+        }
+
+        function setPresetTime(minutes) {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timerDisplay.classList.remove('running');
+            totalSeconds = minutes * 60;
+            remainingSeconds = totalSeconds;
+            updateDisplay();
+            statusDisplay.textContent = `已选择 ${minutes} 分钟`;
+            statusDisplay.className = 'status';
+            
+            // 更新按钮状态
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.time) === minutes) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function addCustomPreset(minutes) {
+            if (minutes && minutes > 0 && minutes <= 180) {
+                // 检查是否已存在
+                const existingPresets = Array.from(document.querySelectorAll('.preset-btn'))
+                    .map(btn => parseInt(btn.dataset.time));
+                
+                if (!existingPresets.includes(minutes)) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'preset-wrapper';
+                    
+                    const button = document.createElement('button');
+                    button.className = 'preset-btn';
+                    button.dataset.time = minutes;
+                    button.textContent = `${minutes}分钟`;
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.innerHTML = '×';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        wrapper.remove();
+                    };
+                    
+                    wrapper.appendChild(button);
+                    wrapper.appendChild(deleteBtn);
+                    presetsGrid.appendChild(wrapper);
+                    
+                    button.addEventListener('click', () => setPresetTime(minutes));
+                    
+                    customInput.value = '';
+                    statusDisplay.textContent = `已添加 ${minutes} 分钟预设`;
+                } else {
+                    alert('该预设时间已存在！');
+                }
+            } else {
+                alert('请输入有效的分钟数（1-180）');
+            }
+        }
+
+        // 事件监听
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        presetsGrid.addEventListener('click', (e) => {
+            if (e.target.classList.contains('preset-btn')) {
+                const minutes = parseInt(e.target.dataset.time);
+                setPresetTime(minutes);
+            }
+        });
+
+        addPresetBtn.addEventListener('click', () => {
+            const minutes = parseInt(customInput.value);
+            addCustomPreset(minutes);
+        });
+
+        customInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const minutes = parseInt(customInput.value);
+                addCustomPreset(minutes);
+            }
+        });
+
+        // 初始化显示
+        updateDisplay();
+    </script>
+</body>
+</html>
